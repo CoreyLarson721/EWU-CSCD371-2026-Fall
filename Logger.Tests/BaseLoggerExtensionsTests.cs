@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+
 using System.Collections.Generic;
 
 namespace Logger.Tests;
 
 [TestClass]
-public class BaseLoggerMixinsTests
+public class BaseLoggerExtensionsTests
 {
     [TestMethod]
     public void Error_WithNullLogger_ThrowsException()
@@ -13,7 +13,7 @@ public class BaseLoggerMixinsTests
         // Arrange
 
         // Act
-        //BaseLoggerMixins.Error(null, "");
+        //BaseLoggerExtensions.Error(null, "");
 
         // Assert
     }
@@ -28,7 +28,7 @@ public class BaseLoggerMixinsTests
         //logger.Error("Message {0}", 42);
 
         // Assert
-        Assert.AreEqual(1, logger.LoggedMessages.Count);
+        Assert.HasCount(1, logger.LoggedMessages);
         Assert.AreEqual(LogLevel.Error, logger.LoggedMessages[0].LogLevel);
         Assert.AreEqual("Message 42", logger.LoggedMessages[0].Message);
     }

@@ -1,0 +1,13 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Logger.Tests/Logger.Tests.csproj" />
+  <Project Path="Logger/Logger.csproj" />
+</Solution>
