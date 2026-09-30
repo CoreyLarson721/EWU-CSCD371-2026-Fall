@@ -4,6 +4,40 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        bool validChoice = true;
+
+        do
+        {
+            Console.Write("1. Take Quiz\n" +
+                "2. Add To Quiz\n" +
+                "3. Quit\n");
+
+            string choice = GetGuessFromUser();
+
+            switch (choice)
+            {
+                case "1":
+                    takeQuiz();
+                    break;
+
+                case "2":
+                    addToQuiz();
+                    break;
+
+                case "3":
+                    Environment.Exit(0);
+                    break;
+
+                default:
+                    validChoice = false;
+                    break;
+            }
+
+        } while (!validChoice);
+    }
+
+
+    public static void takeQuiz() { 
         string filePath = GetFilePath();
         Question[] questions = LoadQuestions(filePath);
 
@@ -93,4 +127,69 @@ public class Program
         }
         return questions;
     }
+
+    //Added feature -> Add New Questions
+    public static void addToQuiz()
+    {
+        Console.WriteLine("New Question:");
+        string question = Console.ReadLine();
+        string[] options = new string[3];
+
+        for(int i = 0; i < options.Length; i++)
+        {
+            Console.WriteLine("Option " +  (i + 1) + ": ");
+            options[i] = Console.ReadLine();
+
+        }
+
+        Console.WriteLine("Correct Option: ");
+        string answer = GetGuessFromUser();
+
+        Question q = new Question();
+        q.Text = question;
+        q.Answers = options;
+        q.CorrectAnswerIndex = answer;
+
+        AddQuestion(q);
+    }
+
+    public static bool AddQuestion(Question question)
+    {
+        string filePath = "test.txt";
+
+        Console.WriteLine("Writing to: " + Path.GetFullPath(filePath));
+        Console.WriteLine("Question: " + question.Text);
+        Console.WriteLine("Answers:");
+
+        foreach (string option in question.Answers)
+        {
+            Console.WriteLine(option);
+        }
+
+        Console.WriteLine("Correct answer: " + question.CorrectAnswerIndex);
+
+        try
+        {
+            using (StreamWriter writer = new StreamWriter(filePath, true))
+            {
+                writer.WriteLine(question.Text);
+
+                foreach (string option in question.Answers)
+                {
+                    writer.WriteLine(option);
+                }
+
+                writer.WriteLine(question.CorrectAnswerIndex);
+            }
+
+            Console.WriteLine("Question Added Successfully");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error Adding Question: " + ex.Message);
+            return false;
+        }
+    }
+
 }
