@@ -4,41 +4,71 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        bool validChoice = true;
+        bool continueRunning = true;
 
-        do
+        while (continueRunning)
         {
-            Console.Write("1. Take Quiz\n" +
+            Console.Write(
+                "1. Take Quiz\n" +
                 "2. Add To Quiz\n" +
                 "3. Quit\n");
 
-            string choice = GetGuessFromUser();
+            string choice = GetUserInput();
 
             switch (choice)
             {
                 case "1":
-                    takeQuiz();
+                    TakeQuiz();
                     break;
 
                 case "2":
-                    addToQuiz();
+                    AddToQuiz();
                     break;
 
                 case "3":
-                    Environment.Exit(0);
-                    break;
+                    continueRunning = false;
+                    continue;
 
                 default:
-                    validChoice = false;
-                    break;
+                    Console.WriteLine("Invalid choice. Please select 1, 2, or 3.");
+                    continue;
             }
 
-        } while (!validChoice);
+            bool repeatOptions = true;
+            while (repeatOptions)
+            {
+
+                repeatOptions = false;
+                Console.Write("Would you like to take more actions? (Y/N): ");
+                string answer = GetUserInput();
+
+                switch (answer.Trim().ToLower())
+                {
+                    case "y":
+                        continueRunning = true;
+                        break;
+                    case "n":
+                        continueRunning = false;
+                        break;
+                    default:
+                        repeatOptions = true;
+                        Console.WriteLine("Please Enter Proper Answer Y/N!");
+                        continue;
+
+                }
+
+                Console.WriteLine();
+            }
+
+
+        }
     }
 
-
-    public static void takeQuiz() { 
+    public static void TakeQuiz()
+    {
         string filePath = GetFilePath();
+        Console.WriteLine(Path.GetFullPath(filePath));
+
         Question[] questions = LoadQuestions(filePath);
 
         int numberCorrect = 0;
@@ -64,11 +94,11 @@ public class Program
     {
         DisplayQuestion(question);
 
-        string userGuess = GetGuessFromUser();
+        string userGuess = GetUserInput();
         return DisplayResult(userGuess, question);
     }
 
-    public static string GetGuessFromUser()
+    public static string GetUserInput()
     {
         return Console.ReadLine();
     }
@@ -99,8 +129,8 @@ public class Program
         return "Trivia.txt";
     }
 
-    public static Question[] LoadQuestions(string filePath)
-    {
+    public static Question[] LoadQuestions(string filePath) { 
+    
         string[] lines = File.ReadAllLines(filePath);
 
         Question[] questions = new Question[lines.Length / 5];
@@ -115,9 +145,11 @@ public class Program
 
             string correctAnswerIndex = lines[lineIndex + 4];
 
-            Question question = new();
-            question.Text = questionText;
-            question.Answers = new string[3];
+            Question question = new()
+            {
+                Text = questionText,
+                Answers = new string[3]
+            };
             question.Answers[0] = answer1;
             question.Answers[1] = answer2;
             question.Answers[2] = answer3;
@@ -125,41 +157,40 @@ public class Program
 
             questions[i] = question;
         }
+
         return questions;
     }
 
     //Added feature -> Add New Questions
-    public static void addToQuiz()
+    public static void AddToQuiz()
     {
         Console.WriteLine("New Question:");
-        string question = Console.ReadLine();
+        string question = GetUserInput();
         string[] options = new string[3];
 
-        for(int i = 0; i < options.Length; i++)
+        for (int i = 0; i < options.Length; i++)
         {
-            Console.WriteLine("Option " +  (i + 1) + ": ");
-            options[i] = Console.ReadLine();
+            Console.WriteLine("Option " + (i + 1) + ": ");
+            options[i] = GetUserInput();
 
         }
 
         Console.WriteLine("Correct Option: ");
-        string answer = GetGuessFromUser();
+        string answer = GetUserInput();
 
-        Question q = new Question();
-        q.Text = question;
-        q.Answers = options;
-        q.CorrectAnswerIndex = answer;
+        Question q = new()
+        {
+            Text = question,
+            Answers = options,
+            CorrectAnswerIndex = answer
+        };
 
         AddQuestion(q);
     }
 
     public static bool AddQuestion(Question question)
     {
-        string filePath = "test.txt";
-
-        Console.WriteLine("Writing to: " + Path.GetFullPath(filePath));
-        Console.WriteLine("Question: " + question.Text);
-        Console.WriteLine("Answers:");
+        string filePath = "Trivia.txt";
 
         foreach (string option in question.Answers)
         {
@@ -170,19 +201,20 @@ public class Program
 
         try
         {
-            using (StreamWriter writer = new StreamWriter(filePath, true))
+            using StreamWriter writer = new(filePath, append: true);
+            writer.WriteLine(); //Escape to new row
+            writer.WriteLine(question.Text);
+
+            foreach (string option in question.Answers)
             {
-                writer.WriteLine(question.Text);
-
-                foreach (string option in question.Answers)
-                {
-                    writer.WriteLine(option);
-                }
-
-                writer.WriteLine(question.CorrectAnswerIndex);
+                writer.WriteLine(option);
             }
 
+            writer.Write(question.CorrectAnswerIndex);
+
             Console.WriteLine("Question Added Successfully");
+
+            writer.Close();
             return true;
         }
         catch (Exception ex)

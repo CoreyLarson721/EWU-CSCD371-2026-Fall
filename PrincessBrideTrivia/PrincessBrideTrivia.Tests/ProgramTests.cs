@@ -85,4 +85,80 @@ public class ProgramTests
             File.AppendAllLines(filePath, lines);
         }
     }
+
+    [TestMethod]
+    public void AddQuestion_ValidQuestion_AddsQuestionToFile()
+    {
+        // Arrange
+        string filePath = "Trivia.txt";
+
+        Question question = new();
+        question.Text = "Testing Question";
+        question.Answers =
+        [
+            "No",
+        "Yes",
+        "Maybe"
+        ];
+        question.CorrectAnswerIndex = "2";
+
+        // Act
+        bool result = Program.AddQuestion(question);
+
+        // Assert
+        Assert.IsTrue(result);
+        Assert.IsTrue(File.Exists(filePath));
+
+        string[] lines = File.ReadAllLines(filePath);
+
+        Assert.Contains("Testing Question", lines);
+        Assert.Contains("No", lines);
+        Assert.Contains("Yes", lines);
+        Assert.Contains("Maybe", lines);
+        Assert.Contains("2", lines);
+        Assert.Contains("2", lines);
+    }
+
+    [TestMethod]
+    public void AddQuestion_ValidQuestion_WritesFiveLines()
+    {
+        // Arrange
+        string filePath = "Trivia.txt";
+
+        Question question = new()
+        {
+            Text = "Testing Question",
+            Answers =
+            [
+                "No",
+            "Yes",
+            "Maybe"
+            ],
+            CorrectAnswerIndex = "2"
+        };
+
+        // Get the number of lines before adding the question
+        string[] linesBefore = File.ReadAllLines(filePath);
+        int originalLineCount = linesBefore.Length;
+
+        // Act
+        bool result = Program.AddQuestion(question);
+
+        // Assert
+        Assert.IsTrue(result);
+
+        string[] linesAfter = File.ReadAllLines(filePath);
+
+        // The question should have added exactly 5 lines
+        Assert.HasCount(originalLineCount + 5, linesAfter);
+
+        // Check the five newly added lines
+        int newQuestionIndex = originalLineCount;
+
+        Assert.AreEqual("Testing Question", linesAfter[newQuestionIndex]);
+        Assert.AreEqual("No", linesAfter[newQuestionIndex + 1]);
+        Assert.AreEqual("Yes", linesAfter[newQuestionIndex + 2]);
+        Assert.AreEqual("Maybe", linesAfter[newQuestionIndex + 3]);
+        Assert.AreEqual("2", linesAfter[newQuestionIndex + 4]);
+    }
 }
