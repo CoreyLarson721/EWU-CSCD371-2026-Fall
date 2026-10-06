@@ -22,12 +22,12 @@ public class FileLogger : BaseLogger
     /// <summary>
     /// Logs a message with a log level
     /// </summary>
-    /// <param name="level"></param> log level
+    /// <param name="logLevel"></param> log level
     /// <param name="message"></param> log message
-    public override void Log(LogLevel level, string message)
+    public override void Log(LogLevel logLevel, string message)
     {
         string line = string.Create(CultureInfo.CurrentCulture, 
-            $"{DateTime.Now} {base.ClassName} {level}: {message}{Environment.NewLine}");
+            $"{DateTime.Now} {base.ClassName} {logLevel}: {message}{Environment.NewLine}");
 
         File.AppendAllText(_filePath, line);
     }
