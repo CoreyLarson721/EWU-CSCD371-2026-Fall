@@ -24,8 +24,9 @@ public class LogFactoryTests
         var factory = new LogFactory();
         factory.ConfigureFileLogger("log.txt");
 
-        BaseLogger logger = factory.CreateLogger(nameof(LogFactoryTests));
+        BaseLogger? logger = factory.CreateLogger(nameof(LogFactoryTests));
 
+        Assert.IsNotNull(logger);
         Assert.IsInstanceOfType<FileLogger>(logger);
         Assert.AreEqual(nameof(LogFactoryTests), logger.ClassName);
     }
