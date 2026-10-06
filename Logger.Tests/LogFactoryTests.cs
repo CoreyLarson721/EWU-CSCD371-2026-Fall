@@ -1,14 +1,23 @@
 ﻿namespace Logger.Tests;
 
+/// <summary>
+/// Tests for log factory
+/// </summary>
 [TestClass]
 public class LogFactoryTests
 {
+    /// <summary>
+    /// Used for testing CreateLogger
+    /// </summary>
     [TestMethod]
     public void CreateLoggerReturnsNullWhenNotConfigured()
     {
         Assert.IsNull(new LogFactory().CreateLogger(nameof(LogFactoryTests)));
     }
 
+    /// <summary>
+    /// Used for testing CreateLogger
+    /// </summary>
     [TestMethod]
     public void CreateLoggerReturnsFileLoggerWithClassNameWhenConfigured()
     {
@@ -21,6 +30,9 @@ public class LogFactoryTests
         Assert.AreEqual(nameof(LogFactoryTests), logger.ClassName);
     }
 
+    /// <summary>
+    /// Used for testing CreateLogger exceptions
+    /// </summary>
     [TestMethod]
     public void ConfigureFileLoggerThrowsOnNullOrEmptyPath()
     {

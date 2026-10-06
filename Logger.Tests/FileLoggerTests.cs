@@ -4,6 +4,9 @@ namespace Logger.Tests;
 [TestClass]
 public class FileLoggerTests
 {
+    /// <summary>
+    /// Used for testing the log file output
+    /// </summary>
     [TestMethod]
     public void LogAppendsMessagesOnSeparateLines()
     {
@@ -29,6 +32,9 @@ public class FileLoggerTests
         }
     }
 
+    /// <summary>
+    /// Used for testing constructor
+    /// </summary>
     [TestMethod]
     public void ConstructorThrowsOnNullPath()
     {
