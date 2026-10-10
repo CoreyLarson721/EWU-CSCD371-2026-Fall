@@ -27,7 +27,7 @@ public class FileLogger : BaseLogger
     public override void Log(LogLevel logLevel, string message)
     {
         string line = string.Create(CultureInfo.CurrentCulture, 
-            $"{DateTime.Now} {base.ClassName} {logLevel}: {message}{Environment.NewLine}");
+            $"{DateTime.Now} {ClassName} {logLevel}: {message}{Environment.NewLine}");
 
         File.AppendAllText(_filePath, line);
     }

@@ -44,15 +44,15 @@ public class TraceLoggerTests
         }
         
         string[] lines = File.ReadAllLines(path);
-            Assert.HasCount(2, lines);
+        Assert.HasCount(2, lines);
 
         try
         {
-            StringAssert.Contains(lines[0], nameof(TraceLoggerTests));
-            StringAssert.Contains(lines[0], "Warning");
-            StringAssert.Contains(lines[0], "First");
-            StringAssert.Contains(lines[0], DateTime.Now.Year.ToString(CultureInfo.CurrentCulture));
-            StringAssert.Contains(lines[1], "Error: Second");
+            Assert.Contains(nameof(TraceLoggerTests), lines[0]);
+            Assert.Contains("Warning", lines[0]);
+            Assert.Contains("First", lines[0]);
+            Assert.Contains(DateTime.Now.Year.ToString(CultureInfo.CurrentCulture), lines[0]);
+            Assert.Contains("Error: Second", lines[1]);
         }
         finally
         {

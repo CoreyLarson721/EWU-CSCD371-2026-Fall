@@ -14,7 +14,9 @@ public class BaseLoggerExtensionsTests
     [TestCleanup]
     public void Cleanup()
     {
-        File.Delete(_path);
+        if (_path != null || File.Exists(_path)) {
+            File.Delete(_path);
+        } 
     }
 
     private FileLogger CreateLogger() =>

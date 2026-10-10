@@ -14,17 +14,19 @@ public class FileLoggerTests
         try
         {
             var logger = new FileLogger(path) { ClassName = nameof(FileLoggerTests) };
+            //Resolves new years error 
+            int currYear = DateTime.Now.Year;
 
             logger.Log(LogLevel.Warning, "First");
             logger.Log(LogLevel.Error, "Second");
 
             string[] lines = File.ReadAllLines(path);
             Assert.HasCount(2, lines);
-            StringAssert.Contains(lines[0], nameof(FileLoggerTests));
-            StringAssert.Contains(lines[0], "Warning");
-            StringAssert.Contains(lines[0], "First");
-            StringAssert.Contains(lines[0], DateTime.Now.Year.ToString(CultureInfo.CurrentCulture));
-            StringAssert.Contains(lines[1], "Error: Second");
+            Assert.Contains(nameof(FileLoggerTests), lines[0]);
+            Assert.Contains("Warning", lines[0]);
+            Assert.Contains("First", lines[0]);
+            Assert.Contains(currYear.ToString(CultureInfo.CurrentCulture), lines[0]);
+            Assert.Contains("Error: Second", lines[1]);
         }
         finally
         {

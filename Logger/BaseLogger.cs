@@ -12,6 +12,6 @@ public abstract class BaseLogger
     /// <summary>
     /// The name of the logged class
     /// </summary>
-    public required string ClassName { get; set; } = string.Empty;
+    public required string ClassName { get; init; } = string.Empty;
 }
 
