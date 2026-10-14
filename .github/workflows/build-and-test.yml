@@ -48,6 +48,11 @@ on:
         required: false
         type: boolean
         default: true
+      test-runner:
+        description: "Test runner to use: 'auto' (read test.runner from global.json), 'VSTest', or 'MTP'"
+        required: false
+        type: string
+        default: "auto"
 
 permissions:
   contents: read
@@ -70,6 +75,23 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Detect test runner
+        id: runner
+        working-directory: "."
+        env:
+          REQUESTED_RUNNER: ${{ inputs.test-runner }}
+        run: |
+          runner="$REQUESTED_RUNNER"
+          if [ "$runner" = "auto" ]; then
+            runner=$(jq -r '.test.runner // "VSTest"' global.json 2>/dev/null || echo "VSTest")
+          fi
+          case "$runner" in
+            MTP|Microsoft.Testing.Platform) runner="MTP" ;;
+            *) runner="VSTest" ;;
+          esac
+          echo "Using test runner: $runner"
+          echo "runner=$runner" >> "$GITHUB_OUTPUT"
+
       # .editorconfig and .runsettings files getting added
       - name: Download .editorconfig file
         uses: actions/checkout@v7
@@ -83,6 +105,7 @@ jobs:
             Shared/.runsettings
             Shared/analyzers.txt
             Shared/dependencies.txt
+            Shared/dependencies.mtp.txt
           sparse-checkout-cone-mode: false
       - name: Copy .editorconfig file if not exists
         working-directory: "."
@@ -136,7 +159,8 @@ jobs:
         working-directory: "."
         shell: pwsh
         run: |
-          $analyzersPath = "${{ github.workspace }}/temp/Shared/dependencies.txt"
+          $dependenciesFile = if ("${{ steps.runner.outputs.runner }}" -eq "MTP") { "dependencies.mtp.txt" } else { "dependencies.txt" }
+          $analyzersPath = "${{ github.workspace }}/temp/Shared/$dependenciesFile"
           if (-not (Test-Path -Path $analyzersPath)) {
           Write-Error "File not found: $analyzersPath"
           exit 1
@@ -150,7 +174,7 @@ jobs:
           Set-Location -Path $_.FullName
           $analyzers = Get-Content $analyzersPath
           foreach ($analyzer in $analyzers) {
-              $package = dotnet list package | Select-String -Pattern $analyzer
+              $package = dotnet list package --include-transitive | Select-String -Pattern "^\s*>\s+$([regex]::Escape($analyzer))\s"
               if ($null -eq $package) {
               dotnet add package $analyzer
               }
@@ -164,15 +188,19 @@ jobs:
 
       - name: Build
         run: dotnet build --no-restore -p:Nullable=${{ inputs.enable-nullability == true && 'enable' || 'disable' }} -p:TreatWarningsAsErrors=true -p:EnableNETAnalyzers=${{ inputs.enable-net-analyzers }} -p:CodeAnalysisTreatWarningsAsErrors=true -p:NoWarn=EnableGenerateDocumentationFile -p:AnalysisLevel=latest-Recommended -p:EnforceCodeStyleInBuild=${{ inputs.dotnet-build-enforce-code-style }}
-      - name: Test
+      - name: Test (VSTest)
+        if: ${{ steps.runner.outputs.runner != 'MTP' }}
         run: dotnet test --no-build --verbosity normal --settings ${{github.workspace}}/.runsettings /p:CollectCoverage=true --collect:"XPlat Code Coverage" --logger trx --results-directory coveragereport
+      - name: Test (Microsoft.Testing.Platform)
+        if: ${{ steps.runner.outputs.runner == 'MTP' }}
+        run: dotnet test --no-build --verbosity normal --results-directory coveragereport --report-trx --coverage --coverage-output-format cobertura
 
       - name: ReportGenerator
         id: reportgenerator
-        if: ${{ !cancelled() && github.event_name == 'pull_request' && hashFiles('**/coverage.cobertura.xml') != '' }}
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && hashFiles('**/*.cobertura.xml') != '' }}
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
         with:
-          reports: '**/coverage.cobertura.xml'
+          reports: '**/*.cobertura.xml'
           targetdir: coveragereport
           reporttypes: MarkdownSummaryGithub
 

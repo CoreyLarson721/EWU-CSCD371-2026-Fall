@@ -1,0 +1,2 @@
+Microsoft.Testing.Extensions.CodeCoverage
+Microsoft.Testing.Extensions.TrxReport
