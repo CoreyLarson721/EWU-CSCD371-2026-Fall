@@ -228,6 +228,7 @@ jobs:
           reporttypes: HtmlInline
 
       - name: Upload HTML coverage report
+        id: upload-coverage-html
         if: ${{ !cancelled() && steps.reportgenerator-html.outcome == 'success' }}
         uses: actions/upload-artifact@v7.0.2
         with:
@@ -235,6 +236,51 @@ jobs:
           path: coverage-html/
           if-no-files-found: error
           retention-days: 14
+
+      - name: ReportGenerator (HTML summary)
+        id: reportgenerator-html-summary
+        if: ${{ !cancelled() && steps.reportgenerator.outcome == 'success' }}
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
+        with:
+          reports: '**/*.cobertura.xml'
+          targetdir: coverage-html-summary
+          reporttypes: HtmlSummary
+
+      # Unarchived artifacts must be a single file and are named after it.
+      - name: Prepare browsable HTML summary
+        if: ${{ !cancelled() && steps.reportgenerator-html-summary.outcome == 'success' }}
+        working-directory: "."
+        run: |
+          mkdir -p coverage-html-view
+          cp coverage-html-summary/summary.html "coverage-html-view/coverage-summary-${{ github.run_attempt }}.html"
+
+      - name: Upload browsable HTML summary
+        id: upload-coverage-html-summary
+        if: ${{ !cancelled() && steps.reportgenerator-html-summary.outcome == 'success' }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          path: coverage-html-view/coverage-summary-${{ github.run_attempt }}.html
+          archive: false
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Link HTML coverage in Job Summary
+        if: ${{ !cancelled() && (steps.upload-coverage-html-summary.outputs.artifact-url != '' || steps.upload-coverage-html.outputs.artifact-url != '') }}
+        working-directory: "."
+        env:
+          SUMMARY_URL: ${{ steps.upload-coverage-html-summary.outputs.artifact-url }}
+          FULL_URL: ${{ steps.upload-coverage-html.outputs.artifact-url }}
+        run: |
+          {
+            echo ""
+            echo "### HTML coverage report"
+            if [ -n "$SUMMARY_URL" ]; then
+              echo "- [View coverage summary in browser]($SUMMARY_URL)"
+            fi
+            if [ -n "$FULL_URL" ]; then
+              echo "- [Download full line-by-line report (zip)]($FULL_URL)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Explain missing coverage
         if: ${{ !cancelled() && steps.reportgenerator.outcome == 'skipped' }}
