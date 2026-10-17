@@ -77,8 +77,9 @@ enable Actions on their forks; maintainers must still approve runs when required
 by the repository's external-contributor policy.
 
 The build publishes its coverage summary as an artifact and job summary, including
-available coverage when tests fail. A browsable HTML coverage report is uploaded
-as the `coverage-html-<attempt>` artifact. `Report PR results`, installed on `main`,
+available coverage when tests fail. The job summary links to an HTML coverage
+summary that opens directly in the browser, and to the full line-by-line HTML
+report (`coverage-html-<attempt>` zip artifact). `Report PR results`, installed on `main`,
 responds to the completed run and posts a sticky PR comment with the outcome,
 commit, run link, and available coverage. Build failures without coverage still
 receive a status comment. Reporting errors are visible in the reporter's logs.
